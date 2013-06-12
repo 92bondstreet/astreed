@@ -109,11 +109,20 @@ class Astreed {
 	public function __destruct(){
 	
 		// and now we're done; close it
-		$this->bdd = null;
+		$this->pdodb = null;
 		if(isset($this->log_file))
 			fclose($this->log_file);
 	}
 	
+	/**
+	 * Write to log file
+	 *
+	 * @param $value string to write 
+	 *
+	 */
+	function dump_to_log($value){
+		fwrite($this->log_file, $value."\n");
+	}
 	
 	/**
 	 * Get RSS url from website url
