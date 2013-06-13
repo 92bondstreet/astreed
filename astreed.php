@@ -85,9 +85,15 @@ class Astreed {
 	public function __construct($log=false){
 	
 		if(defined('DB_NAME') && defined('DB_USER') && defined('DB_PWD') ){
-			$pdo_options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;		
-			$this->pdodb = new PDO(DB_NAME, DB_USER, DB_PWD);
-			$this->pdodb->exec("SET CHARACTER SET utf8");
+			try{
+				$pdo_options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;		
+				$this->pdodb = new PDO(DB_NAME, DB_USER, DB_PWD,$pdo_options);
+				$this->pdodb->exec("SET CHARACTER SET utf8");
+			}
+			catch (PDOException $e) {
+				echo 'Connection failed: ' . $e->getMessage();
+				$this->pdodb = null;
+			}
 		}
 		else
 			$this->pdodb = null;
@@ -219,6 +225,9 @@ class Astreed {
 	 
 	function insert_feeds_from_url($feeds_table_name, $rss_url, $nb_feeds, $blogname = NULL){
 	
+		if(!isset($this->pdodb))
+			return false;
+	
 		// Step 0 : get feeds
 		$feeds = $this->parse_rss_from_url($rss_url, $nb_feeds, $blogname);
 		
@@ -301,6 +310,9 @@ class Astreed {
 	 */
 	 
 	function insert_feeds_from_db($url_table_name, $feeds_table_name, $nb_feeds){
+	
+		if(!isset($this->pdodb))
+			return false;
 	
 		// Step 0 : get feeds
 		$feeds = $this->parse_rss_from_db($url_table_name, $nb_feeds);
